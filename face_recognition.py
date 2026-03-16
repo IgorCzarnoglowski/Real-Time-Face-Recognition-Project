@@ -25,7 +25,7 @@ for fx in os.listdir(dataset_path): #we are looping through dataset directory
         data_item = np.load(dataset_path+fx)
         face_data.append(data_item)
 
-        target = class_id + np.ones((data_item.shape[0],))
+        target = class_id * np.ones((data_item.shape[0],))
         class_id += 1
         labels.append(target)
 
@@ -59,7 +59,7 @@ while True:
         out = knn.predict(face_section.flatten().reshape(1, -1))
         predicted_name = names[int(out[0])]
 
-        cv2.putText(frame, predicted_name,(x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2, cv2.LINE_AA)
+        cv2.putText(frame, predicted_name,(x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2, cv2.LINE_AA)
         cv2.rectangle(frame, (x,y), (x+w,y+h), (255,255,255), 2)
 
     cv2.imshow("Faces", frame)
