@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import os
 from sklearn.neighbors import KNeighborsClassifier
 import pickle
 import psycopg2
@@ -15,16 +14,12 @@ conn = psycopg2.connect(host='localhost', dbname='postgres', user='postgres', pa
 cur = conn.cursor()
 
 
-'Statements to end work with postgres'
-conn.commit()
-cur.close()
-conn.close()
-
-
 videoCap = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 
-dataset_path = './face_dataset/'
+cur.execute("SELECT id, name, data FROM faces")
+rows = cur.fetchall()
+conn.commit()
 
 face_data = []
 labels = []
@@ -33,16 +28,21 @@ names = {} #mapping between id and name
 
 'dataset preparation'
 
-for fx in os.listdir(dataset_path): #we are looping through dataset directory
-    if fx.endswith('.npy'):
-        names[class_id] = fx[:-4] #fx[-4] to strip .npy extension
-        data_item = np.load(dataset_path+fx)
-        face_data.append(data_item)
+for row in rows: #we are looping through dataset directory
+    face_id, name, data = row
+    names[class_id] = name
+    'Deserializng object'
+    data_item = pickle.loads(data)
 
-        target = class_id * np.ones((data_item.shape[0],))
-        class_id += 1
-        labels.append(target)
+    face_data.append(data_item)
+    'This line creates an array of labels for a given face, where every element is the class_id of that person'
+    target = class_id * np.ones((data_item.shape[0,]))
+    class_id += 1
+    labels.append(target)
 
+'''After np.concatenate at the end, all labels are joined into one flat array
+which is used to train a classifier to associate face embeddings with a person's ID.
+'''
 face_dataset = np.concatenate(face_data, axis=0)
 face_labels = np.concatenate(labels, axis=0).reshape(-1,1)
 
@@ -81,7 +81,11 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+'Statements to end work with postgres'
+cur.close()
+conn.close()
 
+'End of work with cv2'
 videoCap.release()
 cv2.destroyAllWindows()
 

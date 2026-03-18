@@ -13,11 +13,6 @@ conn = psycopg2.connect(host='localhost', dbname='postgres', user='postgres', pa
 cur = conn.cursor()
 
 
-'Statements to end work with postgres'
-conn.commit()
-cur.close()
-conn.close()
-
 
 'This variable is need to append every x seconds face into the face_data array, so I have just enough data to recognize face'
 skip = 0
@@ -79,10 +74,25 @@ while True:
 face_data = np.array(face_data)
 'we reshape the data inside of an array from 3D to 1D shape, so KNN algorithm could work'
 face_data = face_data.reshape(face_data.shape[0], -1) #-1 tells numpy to figure out the shape automatically
-print(face_data.shape)
+#print(face_data.shape)
 
-np.save(dataset_path + face_name, face_data)
-print('Data saved at: {}'.format(dataset_path + face_name + '.npy'))
+'Serialiazing face_data into a byte-stream'
+pickle_string = pickle.dumps(face_data)
 
+'Part responsible for adding face_data to postgresql db'
+cur.execute(f"""INSERT INTO faces (name, data) VALUES
+({face_name}, {pickle_string})
+""")
+
+
+#np.save(dataset_path + face_name, face_data)
+#print('Data saved at: {}'.format(dataset_path + face_name + '.npy'))
+
+'Statements to end work with postgres'
+conn.commit()
+cur.close()
+conn.close()
+
+'End of work with cv2'
 videoCap.release()
 cv2.destroyAllWindows()
