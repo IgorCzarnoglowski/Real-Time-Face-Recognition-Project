@@ -36,7 +36,7 @@ for row in rows: #we are looping through dataset directory
 
     face_data.append(data_item)
     'This line creates an array of labels for a given face, where every element is the class_id of that person'
-    target = class_id * np.ones((data_item.shape[0,]))
+    target = class_id * np.ones((data_item.shape[0],))
     class_id += 1
     labels.append(target)
 

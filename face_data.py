@@ -17,7 +17,7 @@ cur = conn.cursor()
 'This variable is need to append every x seconds face into the face_data array, so I have just enough data to recognize face'
 skip = 0
 face_data = []
-dataset_path = './face_dataset/'
+#dataset_path = './face_dataset/'
 
 face_name = input('Enter the name of the person: \n')
 
@@ -80,9 +80,8 @@ face_data = face_data.reshape(face_data.shape[0], -1) #-1 tells numpy to figure 
 pickle_string = pickle.dumps(face_data)
 
 'Part responsible for adding face_data to postgresql db'
-cur.execute(f"""INSERT INTO faces (name, data) VALUES
-({face_name}, {pickle_string})
-""")
+cur.execute('INSERT INTO faces (name, data) VALUES (%s, %s)',
+(face_name, pickle_string))
 
 
 #np.save(dataset_path + face_name, face_data)
