@@ -1,10 +1,25 @@
 import cv2
 import numpy as np
+import pickle
+import psycopg2
 
 videoCap = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 
-'This variable is need to append every 10 seconds face into the face_data array, so I have just enough data to recognize face'
+'Connecting to DataBase'
+conn = psycopg2.connect(host='localhost', dbname='postgres', user='postgres', password='1234')
+
+'Initializing cursor to execute commands in db'
+cur = conn.cursor()
+
+
+'Statements to end work with postgres'
+conn.commit()
+cur.close()
+conn.close()
+
+
+'This variable is need to append every x seconds face into the face_data array, so I have just enough data to recognize face'
 skip = 0
 face_data = []
 dataset_path = './face_dataset/'
@@ -42,7 +57,7 @@ while True:
         face_offset = frame[y-offset:y+h+offset,x-offset:x+w+offset]
         face_selection = cv2.resize(face_offset,(100,100))
 
-        if skip % 10 == 0:
+        if skip % 5 == 0:
             face_data.append(face_selection)
             print(len(face_data))
 

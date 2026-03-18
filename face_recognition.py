@@ -2,9 +2,23 @@ import numpy as np
 import cv2
 import os
 from sklearn.neighbors import KNeighborsClassifier
+import pickle
+import psycopg2
 
-
+'Initializng knn module from sklearn'
 knn = KNeighborsClassifier(n_neighbors=5)
+
+'Connecting to DataBase'
+conn = psycopg2.connect(host='localhost', dbname='postgres', user='postgres', password='1234')
+
+'Initializing cursor to execute commands in db'
+cur = conn.cursor()
+
+
+'Statements to end work with postgres'
+conn.commit()
+cur.close()
+conn.close()
 
 
 videoCap = cv2.VideoCapture(0)
